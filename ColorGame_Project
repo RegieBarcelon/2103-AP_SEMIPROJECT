@@ -1,22 +1,29 @@
 PROJECT TITLE "Color Game"
 
-VIDEO Demo URL (https://youtu.be/S752ocCeCkE)
+Old VIDEO Demo URL (https://youtu.be/S752ocCeCkE)
+New Video Demo URL (https://youtu.be/DM6dBXmf_C0)
 
 
 How to Play
-Starting Money: You begin with ₱50.
-Betting:
-Choose any color(s) to bet on from the list: Red, Blue, Green, Yellow, White, Pink.
-Place your wager for each color (up to your available balance).
-Winning Colors:
-The game randomly selects 3 winning colors each round.
-If you bet on a winning color, you earn double your wager.
-If your color isn’t selected, you lose the amount you bet.
-Borrowing:
-If your balance drops to ₱0, you can borrow ₱50, up to a maximum debt of ₱100.
-If you run out of money and reach the debt limit, the game ends (bankruptcy).
-End Game:
-You can end the game anytime by choosing not to play another round.
-Any remaining money is used to pay off debts automatically.
+
+1.Start the Game: Log in with your account or register as a new user. New accounts start with ₱50.
+
+2.Place Bets: Choose colors (Red, Blue, Green, Yellow, White, Pink) and bet money on them.
+
+3.Winning Colors: The system randomly picks 3 winning colors.
+
+4.Result:
+Correct Bet: Win your bet amount (e.g., ₱10 → ₱10 prize).
+Color Appears Twice: Win double your bet (e.g., ₱10 → ₱20 prize).
+Wrong Bet: Lose the bet amount.
+
+5Continue or Stop:
+Play again if you still have money.
+Stop playing by logging out. Your progress is saved.
+6.End Condition: Game ends if you run out of money or choose to quit.
+
+
+
+
 
 
