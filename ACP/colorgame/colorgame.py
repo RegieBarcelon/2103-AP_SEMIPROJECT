@@ -21,30 +21,35 @@ if not os.path.exists(data_file):
 if not os.path.exists(history_file):
     with open(history_file, mode='w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(["Username", "Action", "Timestamp", "Money", "Debt", "Status"])  # Header for login history
+        writer.writerow(["Username", "Action", "Timestamp", "Money", "Status"])  # Header for login history
 
 class LoginForm:
     def __init__(self, root):
         self.root = root
         self.root.title("Login")
-        self.root.geometry("400x200")
+        self.root.attributes('-fullscreen', True)  # Make the window full screen
         self.root.config(bg="#2C3E50")
 
         self.username_var = tk.StringVar()
         self.password_var = tk.StringVar()
 
-        tk.Label(root, text="Login", font=("Arial", 16), fg="#ECF0F1", bg="#2C3E50").pack(pady=10)
+        frame = tk.Frame(root, bg="#2C3E50")
+        frame.pack(expand=True)
 
-        tk.Label(root, text="Username:", font=("Arial", 12), fg="#ECF0F1", bg="#2C3E50").pack()
-        self.username_entry = tk.Entry(root, textvariable=self.username_var, font=("Arial", 12))
-        self.username_entry.pack(pady=5)
+        tk.Label(frame, text="Login", font=("Arial", 24), fg="#ECF0F1", bg="#2C3E50").pack(pady=20)
 
-        tk.Label(root, text="Password:", font=("Arial", 12), fg="#ECF0F1", bg="#2C3E50").pack()
-        self.password_entry = tk.Entry(root, textvariable=self.password_var, font=("Arial", 12), show="*")
-        self.password_entry.pack(pady=5)
+        tk.Label(frame, text="Username:", font=("Arial", 16), fg="#ECF0F1", bg="#2C3E50").pack()
+        self.username_entry = tk.Entry(frame, textvariable=self.username_var, font=("Arial", 16))
+        self.username_entry.pack(pady=10)
 
-        tk.Button(root, text="Login", command=self.login, font=("Arial", 12), bg="#3498DB", fg="white").pack(pady=10)
-        tk.Button(root, text="Go to Register", command=self.open_register, font=("Arial", 12), bg="#2ECC71", fg="white").pack()
+        tk.Label(frame, text="Password:", font=("Arial", 16), fg="#ECF0F1", bg="#2C3E50").pack()
+        self.password_entry = tk.Entry(frame, textvariable=self.password_var, font=("Arial", 16), show="*")
+        self.password_entry.pack(pady=10)
+
+        tk.Button(frame, text="Login", command=self.login, font=("Arial", 16), bg="#3498DB", fg="white", width=15).pack(pady=10)
+        tk.Button(frame, text="Go to Register", command=self.open_register, font=("Arial", 16), bg="#2ECC71", fg="white", width=15).pack()
+
+        tk.Button(self.root, text="Exit", command=self.root.destroy, font=("Arial", 14), bg="#E74C3C", fg="white", width=10).pack(pady=20)
 
     def login(self):
         username = self.username_var.get()
@@ -55,8 +60,7 @@ class LoginForm:
             return
 
         user_found = False
-        user_money = 50  # Default money in case no data is found
-        user_debt = 0     # Default debt in case no data is found
+        user_money = 50  # Default money value if not found in history
 
         # Open the user data file to check credentials
         with open(data_file, mode='r', newline='') as file:
@@ -68,26 +72,24 @@ class LoginForm:
                     break
 
         if user_found:
-            # Retrieve last login history to set user's money and debt
+            # Get the most recent balance from login history
             with open(history_file, mode='r', newline='') as file:
                 reader = csv.reader(file)
-                rows = list(reader)
-                last_row = rows[-1] if len(rows) > 1 else None  # Get the last row if exists
+                lines = list(reader)
+                for row in reversed(lines):  # Go backwards to find the latest login
+                    if row[0] == username:
+                        user_money = int(row[3])  # Use the money from the most recent entry
+                        break
 
-                # Ensure the row contains enough data
-                if last_row and len(last_row) >= 5 and last_row[0] == username:
-                    user_money = int(last_row[3])  # Set money to the last saved value
-                    user_debt = int(last_row[4])   # Set debt to the last saved value
-
-            # Record login action with the current state of money and debt
+            # Record login action with the current state of money
             timestamp = datetime.now().strftime("%I:%M:%S %p, %B %d, %Y")
             with open(history_file, mode='a', newline='') as file:
                 writer = csv.writer(file)
-                writer.writerow([username, "logged in", timestamp, user_money, user_debt, "active"])
+                writer.writerow([username, "logged in", f'"{timestamp}"', user_money, "active"])
 
             messagebox.showinfo("Success", f"Welcome back, {username}!")
             self.root.destroy()
-            self.start_game_app(username, user_money, user_debt)
+            self.start_game_app(username, user_money)
         else:
             messagebox.showerror("Error", "Invalid username or password.")
 
@@ -97,33 +99,38 @@ class LoginForm:
         RegisterForm(root)
         root.mainloop()
 
-    def start_game_app(self, username, user_money, user_debt):
+    def start_game_app(self, username, user_money):
         root = tk.Tk()
-        app = ColorGameApp(root, username, user_money, user_debt)
+        app = ColorGameApp(root, username, user_money)
         root.mainloop()
 
 class RegisterForm:
     def __init__(self, root):
         self.root = root
         self.root.title("Register")
-        self.root.geometry("400x200")
+        self.root.attributes('-fullscreen', True)  # Make the window full screen
         self.root.config(bg="#2C3E50")
 
         self.username_var = tk.StringVar()
         self.password_var = tk.StringVar()
 
-        tk.Label(root, text="Register", font=("Arial", 16), fg="#ECF0F1", bg="#2C3E50").pack(pady=10)
+        frame = tk.Frame(root, bg="#2C3E50")
+        frame.pack(expand=True)
 
-        tk.Label(root, text="Username:", font=("Arial", 12), fg="#ECF0F1", bg="#2C3E50").pack()
-        self.username_entry = tk.Entry(root, textvariable=self.username_var, font=("Arial", 12))
-        self.username_entry.pack(pady=5)
+        tk.Label(frame, text="Register", font=("Arial", 24), fg="#ECF0F1", bg="#2C3E50").pack(pady=20)
 
-        tk.Label(root, text="Password:", font=("Arial", 12), fg="#ECF0F1", bg="#2C3E50").pack()
-        self.password_entry = tk.Entry(root, textvariable=self.password_var, font=("Arial", 12), show="*")
-        self.password_entry.pack(pady=5)
+        tk.Label(frame, text="Username:", font=("Arial", 16), fg="#ECF0F1", bg="#2C3E50").pack()
+        self.username_entry = tk.Entry(frame, textvariable=self.username_var, font=("Arial", 16))
+        self.username_entry.pack(pady=10)
 
-        tk.Button(root, text="Register", command=self.register, font=("Arial", 12), bg="#2ECC71", fg="white").pack(pady=10)
-        tk.Button(root, text="Go to Login", command=self.open_login, font=("Arial", 12), bg="#3498DB", fg="white").pack()
+        tk.Label(frame, text="Password:", font=("Arial", 16), fg="#ECF0F1", bg="#2C3E50").pack()
+        self.password_entry = tk.Entry(frame, textvariable=self.password_var, font=("Arial", 16), show="*")
+        self.password_entry.pack(pady=10)
+
+        tk.Button(frame, text="Register", command=self.register, font=("Arial", 16), bg="#2ECC71", fg="white", width=15).pack(pady=10)
+        tk.Button(frame, text="Go to Login", command=self.open_login, font=("Arial", 16), bg="#3498DB", fg="white", width=15).pack()
+
+        tk.Button(self.root, text="Exit", command=self.root.destroy, font=("Arial", 14), bg="#E74C3C", fg="white", width=10).pack(pady=20)
 
     def register(self):
         username = self.username_var.get()
@@ -149,7 +156,7 @@ class RegisterForm:
         timestamp = datetime.now().strftime("%I:%M:%S %p, %B %d, %Y")
         with open(history_file, mode='a', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow([username, "registered", timestamp, 50, 0, "active"])
+            writer.writerow([username, "registered", f'"{timestamp}"', 50, "active"])
 
         messagebox.showinfo("Success", "Registration successful! You can now log in.")
 
@@ -160,23 +167,25 @@ class RegisterForm:
         root.mainloop()
 
 class ColorGameApp:
-    def __init__(self, root, username, user_money, user_debt):
+    def __init__(self, root, username, user_money):
         self.root = root
         self.username = username
         self.money = user_money  # Initialize with the money from history
-        self.debt = user_debt    # Initialize with the debt from history
-        self.max_debt = 200  # Max debt cap
 
-        self.custom_font = font.Font(family="Arial", size=12)
+        self.root.title("Color Game")
+        self.root.attributes('-fullscreen', True)  # Make the window full screen
+        self.root.config(bg="#2C3E50")
+
+        self.custom_font = font.Font(family="Arial", size=16)
 
         self.main_frame = tk.Frame(root, bg="#2C3E50")
-        self.main_frame.pack(pady=20)
+        self.main_frame.pack(expand=True)
 
         self.user_label = tk.Label(self.main_frame, text=f"Player: {self.username}",
                                     font=self.custom_font, fg="#ECF0F1", bg="#2C3E50")
         self.user_label.grid(row=0, column=0, columnspan=2, pady=10)
 
-        self.money_label = tk.Label(self.main_frame, text=f"Your Money: ₱{self.money} | Your Debt: ₱{self.debt}",
+        self.money_label = tk.Label(self.main_frame, text=f"Your Money: ₱{self.money}",
                                     font=self.custom_font, fg="#ECF0F1", bg="#2C3E50")
         self.money_label.grid(row=1, column=0, columnspan=2, pady=10)
 
@@ -187,10 +196,6 @@ class ColorGameApp:
         self.play_button = tk.Button(self.main_frame, text="Do you want to play?", command=self.ask_play, 
                                       font=self.custom_font, bg="#3498DB", fg="white", relief="solid", width=20, state="disabled")
         self.play_button.grid(row=2, column=1, pady=10)
-
-        self.borrow_button = tk.Button(self.main_frame, text="Borrow ₱50", command=self.borrow_money,
-                                       font=self.custom_font, bg="#E74C3C", fg="white", relief="solid", width=20)
-        self.borrow_button.grid(row=3, column=0, columnspan=2, pady=10)
 
         self.bet_text = tk.Label(self.main_frame, text="", font=self.custom_font, fg="#ECF0F1", bg="#2C3E50")
         self.bet_text.grid(row=4, column=0, columnspan=2)
@@ -206,25 +211,16 @@ class ColorGameApp:
                                        font=self.custom_font, bg="#E74C3C", fg="white", relief="solid", width=20)
         self.logout_button.grid(row=6, column=0, columnspan=2, pady=10)
 
-        if self.money <= 0:
-            self.play_button.config(state="disabled")
-            self.borrow_button.config(state="normal")  # Enable the borrow button if balance is 0
-
     def update_money_label(self):
-        self.money_label.config(text=f"Your Money: ₱{self.money} | Your Debt: ₱{self.debt}")
+        self.money_label.config(text=f"Your Money: ₱{self.money}")
 
     def start_game(self):
         self.play_button.config(state="normal")
-        self.borrow_button.config(state="disabled")  # Disable borrow button when game starts
         self.check_colors_button.config(state="normal")  # Enable the check colors button
         self.bet_text.config(text="Choose the colors you want to bet on.")
         self.start_button.config(state="disabled")
 
     def ask_play(self):
-        if self.money <= 0 and self.debt >= self.max_debt:
-            messagebox.showerror("Error", "You cannot play without money and you have reached the maximum debt limit.")
-            return
-
         play = messagebox.askquestion("Play?", "Do you want to play?")
         if play == "yes":
             self.draw_colors()
@@ -291,52 +287,24 @@ class ColorGameApp:
             self.end_game()
 
     def end_game(self):
-        timestamp = datetime.now().strftime("%I:%M:%S %p, %B %d, %Y")
+        timestamp = datetime.now().strftime('"%I:%M:%S %p, %B %d, %Y"')  # Ensure timestamp is quoted
         with open(history_file, mode='a', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow([self.username, "logged out", timestamp, self.money, self.debt, "inactive"])
+            writer.writerow([self.username, "logged out", timestamp, self.money, "inactive"])
         self.root.quit()
-
-    def borrow_money(self):
-        if self.debt < self.max_debt:
-            self.debt += 50
-            self.money += 50
-            self.update_money_label()
-            messagebox.showinfo("Success", "You borrowed ₱50.")
-        else:
-            messagebox.showerror("Error", "You cannot borrow more money; maximum debt limit reached.")
+        self.root.destroy()  # Close the window
 
     def logout(self):
-        if self.debt == self.max_debt:
-            # If debt is maximum, prompt the user to pay the debt
-            pay_bill = messagebox.askquestion("Pay Bill", "You have an outstanding debt of \u20b1200. Do you want to pay your debt?")
-            if pay_bill == "yes":
-                if self.money >= self.debt:
-                    self.money -= self.debt
-                    self.debt = 0
-                    self.update_money_label()
-                    timestamp = datetime.now().strftime("%I:%M:%S %p, %B %d, %Y")
-                    with open(history_file, mode='a', newline='') as file:
-                        writer = csv.writer(file)
-                        writer.writerow([self.username, "logged out (debt paid)", timestamp, self.money, self.debt, "inactive"])
-                    messagebox.showinfo("Success", "You have paid your debt. Thank you!")
-                    self.root.quit()
-                else:
-                    messagebox.showerror("Error", "You do not have enough money to pay your debt.")
-                    return
-            else:
-                # If they refuse to pay and debt is at maximum, block logout
-                messagebox.showerror("Error", "You cannot log out without paying your debt.")
-                return
-        else:
-            # Proceed with regular logout if debt is not maximum
-            timestamp = datetime.now().strftime("%I:%M:%S %p, %B %d, %Y")
-            with open(history_file, mode='a', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow([self.username, "logged out", timestamp, self.money, self.debt, "inactive"])
-            self.root.quit()
+        timestamp = datetime.now().strftime('"%I:%M:%S %p, %B %d, %Y"')  # Ensure timestamp is quoted
+        with open(history_file, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([self.username, "logged out", timestamp, self.money, "inactive"])
+        
+        # Close the application
+        self.root.quit()
+        self.root.destroy()  # Close the window as well
 
-if __name__ == "__main__":
+if _name_ == "_main_":
     root = tk.Tk()
     app = LoginForm(root)
     root.mainloop()
